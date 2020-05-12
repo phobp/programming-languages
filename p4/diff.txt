@@ -1,0 +1,63 @@
+4c4
+< -- Name:
+---
+> -- Name: Brendan Pho
+12c12,23
+< eval e = -1
+---
+> eval (EInt x) = x
+> eval (EAdd l r) = (eval l) + (eval r)
+> eval (ESub l r) = (eval l) - (eval r)
+> eval (EMul l r) = (eval l) * (eval r)
+> 
+> leftChild (EAdd l _) = l
+> leftChild (ESub l _) = l
+> leftChild (EMul l _) = l
+> 
+> rightChild (EAdd _ r) = r
+> rightChild (ESub _ r) = r
+> rightChild (EMul _ r) = r
+16c27,28
+< countOps e = -1
+---
+> countOps (EInt _) = 0
+> countOps e        = 1 + (countOps $ leftChild e) + (countOps $ rightChild e) 
+21c33,34
+< height e = -1
+---
+> height (EInt _) = 1
+> height e = 1 + max (height $ leftChild e) (height $ rightChild e) 
+26c39,59
+< postfix e = ""
+---
+> postfix (EInt x)   = show x
+> postfix (EAdd l r) = postfix l ++ " " ++ postfix r ++ " +"
+> postfix (ESub l r) = postfix l ++ " " ++ postfix r ++ " -"
+> postfix (EMul l r) = postfix l ++ " " ++ postfix r ++ " *"
+> 
+> -- Quick sort
+> sort :: Ord t => [t] -> [t]
+> sort []     = []
+> sort (x:xs) = 
+>     l ++ [x] ++ r
+>     where
+>         l = sort $ filter (<x) xs
+>         r = sort $ filter (>=x) xs
+> 
+> -- Only works if input is sorted: 
+> uniq :: Ord t => [t] -> [t]
+> uniq []  = []
+> uniq [x] = [x]
+> uniq (x:y:ys)
+>  | x == y    = uniq (y:ys)
+>  | otherwise = x:(uniq (y:ys))
+30,31c63,68
+< uniqInts e = []
+< 
+---
+> uniqInts e = 
+>     let vals = uniqIntsH e
+>     in uniq $ sort vals
+>     where
+>         uniqIntsH (EInt x) = [x]
+>         uniqIntsH e = (uniqIntsH $ leftChild e) ++ (uniqIntsH $ rightChild e) 
